@@ -10,8 +10,6 @@ active_can_buy = False
 active_cannot_buy = False
 mouse_cast_position = (None, None)
 
-fish_caught = 0
-
 mouse = Controller()
 kb = keyboard.Controller()
 ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe")
@@ -53,10 +51,10 @@ def on_press(key):
 
 
 def capture():
-    # (898, 801)
-    # (951, 818)
-    # img = ImageGrab.grab(bbox=(868, 812, 880, 825))
-    img = ImageGrab.grab(bbox=(898, 804, 951, 821))
+    # OLD pos (898, 804, 951, 821)
+    # NEW pos (898, 807, 951, 821)
+
+    img = ImageGrab.grab(bbox=(898, 807, 951, 821))
     img.save(f'testpoint.png')
     return img
 
@@ -64,57 +62,54 @@ def capture():
 def sell():
     global mouse_cast_position, active_can_buy, active_cannot_buy
 
-    frozen_state_can_buy = active_can_buy
-    frozen_state_cannot_buy = active_cannot_buy
+    if active_can_buy:
+        frozen_state_can_buy = active_can_buy
+        frozen_state_cannot_buy = active_cannot_buy
 
-    active_can_buy = False
-    active_cannot_buy = False
+        active_can_buy = False
+        active_cannot_buy = False
 
-    kb.press('e')
-    kb.release('e')
+        kb.press('e')
+        kb.release('e')
 
-    time.sleep(2)
-    ahk.mouse_move(1377, 582)
-    # mouse.position = (1377, 582)
+        time.sleep(2)
+        ahk.mouse_move(1377, 582)
 
-    time.sleep(2)
-    mouse.click(Button.left, 1)
+        time.sleep(2)
+        mouse.click(Button.left, 1)
 
-    time.sleep(1)
-    # mouse.position = (1268, 430)
-    ahk.mouse_move(1268, 430)
-    mouse.click(Button.left, 1)
+        time.sleep(1)
+        ahk.mouse_move(1268, 430)
+        mouse.click(Button.left, 1)
 
-    time.sleep(1)
-    # mouse.position = (1178, 421)
-    ahk.mouse_move(1178, 421)
-    mouse.click(Button.left, 1)
+        time.sleep(1)
+        ahk.mouse_move(1178, 421)
+        mouse.click(Button.left, 1)
 
-    time.sleep(1)
-    mouse.click(Button.left, 1)
+        time.sleep(1)
+        mouse.click(Button.left, 1)
 
-    time.sleep(0.25)
-    # mouse.position = mouse_cast_position
-    ahk.mouse_move(mouse_cast_position[0], mouse_cast_position[1])
+        time.sleep(0.25)
+        ahk.mouse_move(mouse_cast_position[0], mouse_cast_position[1])
 
-    time.sleep(0.25)
+        time.sleep(0.25)
+
+        active_can_buy = frozen_state_can_buy
+        active_cannot_buy = frozen_state_cannot_buy
+
     timer()
-
-    active_can_buy = frozen_state_can_buy
-    active_cannot_buy = frozen_state_cannot_buy
 
 
 def analyze(mean):
-    global fish_caught
 
-    if mean == [83.0, 250.0, 83.0]:
+    if [round(x) for x in mean] == [83.0, 250.0, 83.0]:
         print("Detected fish on, waiting")
 
     elif mean[0] > 80 and mean[1] > 240 and mean[2] > 80:
         print("Detected fish at threshold, clicking")
         mouse.click(Button.left, 1)
 
-    elif mean == [43, 43, 43]:
+    elif [round(x) for x in mean] == [43, 43, 43]:
         print("Detected in IDE, passing")
         pass
 
@@ -129,7 +124,7 @@ def analyze(mean):
 
 def timer():
     print("Starting timer")
-    thread = threading.Timer(600, sell)
+    thread = threading.Timer(1200, sell)
     thread.start()
 
 
