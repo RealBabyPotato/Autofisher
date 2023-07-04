@@ -13,7 +13,6 @@ If detected 3 fishing in a row, deactivate fishing
 
 '''
 
-
 class GUI:
 
     def __init__(self):
@@ -68,22 +67,25 @@ class GUI:
         self.x1_entry_label.place(x=175, y=335)
         self.x1_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5)
         self.x1_entry.place(x=200, y=335)
-        self.x1_entry.insert(tk.END, "10")
+        self.x1_entry.insert(tk.END, 898)
 
         self.x2_entry_label = tk.Label(self.root, text="x2", font=("Lato", 10))
         self.x2_entry_label.place(x=175, y=365)
         self.x2_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5)
         self.x2_entry.place(x=200, y=365)
+        self.x2_entry.insert(tk.END, 951)
 
         self.y1_entry_label = tk.Label(self.root, text="y1", font=("Lato", 10))
         self.y1_entry_label.place(x=250, y=335)
         self.y1_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5)
         self.y1_entry.place(x=275, y=335)
+        self.y1_entry.insert(tk.END, 807)
 
         self.y2_entry_label = tk.Label(self.root, text="y2", font=("Lato", 10))
         self.y2_entry_label.place(x=250, y=365)
         self.y2_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5)
         self.y2_entry.place(x=275, y=365)
+        self.y2_entry.insert(tk.END, 821)
 
         # LOOP
 
@@ -95,10 +97,10 @@ class GUI:
 
     def validate_and_update(self, text):
         if text.isdigit() and text != " ":
-            '''self.x1 = int(self.x1_entry.get())
-            self.x2 = int(self.x2_entry.get())
-            self.y1 = int(self.x1_entry.get())
-            self.y2 = int(self.x1_entry.get())'''
+            '''self.x1 = self.x1_entry.get()
+            self.x2 = self.x2_entry.get()
+            self.y1 = self.y1_entry.get()
+            self.y2 = self.y2_entry.get()'''
             return True
         else:
             return False
@@ -111,4 +113,5 @@ class GUI:
 
 
 if __name__ == '__main__':
+    main.timer()
     gui = GUI()

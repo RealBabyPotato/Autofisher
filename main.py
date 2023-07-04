@@ -128,6 +128,21 @@ def timer():
     thread = threading.Timer(1200, sell)
     thread.start()
 
+def main():
+    while active_can_buy and mouse_cast_position != (None, None):
+        colour_mean = ImageStat.Stat(capture()).mean
+        analyze(colour_mean)
+
+        time.sleep(0.1)
+
+    while active_cannot_buy and mouse_cast_position != (None, None):
+        colour_mean = ImageStat.Stat(capture()).mean
+        analyze(colour_mean)
+
+        time.sleep(0.1)
+
+    if mouse_cast_position == (None, None):
+        print("A mouse cast position has not been assigned. Press [f3] to assign one. ")
 
 # (867, 818) --> test point
 # [92.43589743589743, 250.28205128205127, 92.43589743589743] -> slight white
@@ -151,19 +166,6 @@ if __name__ == '__main__':
 
     while True:
 
-        while active_can_buy and mouse_cast_position != (None, None):
-            colour_mean = ImageStat.Stat(capture()).mean
-            analyze(colour_mean)
-
-            time.sleep(0.1)
-
-        while active_cannot_buy and mouse_cast_position != (None, None):
-            colour_mean = ImageStat.Stat(capture()).mean
-            analyze(colour_mean)
-
-            time.sleep(0.1)
-
-        if mouse_cast_position == (None, None):
-            print("A mouse cast position has not been assigned. Press [f3] to assign one. ")
+        main()
 
         time.sleep(1)
