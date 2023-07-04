@@ -1,4 +1,3 @@
-import time
 import tkinter as tk
 import main
 from PIL import Image, ImageTk
@@ -18,124 +17,140 @@ immediately click to speed up fishing process
 
 '''
 
+# INIT
 
-class GUI:
+root = tk.Tk()
+vision_load = Image.open('testpoint.png')
 
-    def __init__(self):
-        # INIT
+x1 = tk.StringVar(root, '898')
+x2 = tk.StringVar(root, '951')
+y1 = tk.StringVar(root, '807')
+y2 = tk.StringVar(root, '821')
 
-        self.root = tk.Tk()
+x1_i, y1_i, x2_i, y2_i = None, None, None, None
 
-        # self.root.after(1, main.main())
 
-        self.root.attributes('-topmost', True)
-        self.root.resizable(False, False)
+def handle_selection():
+    main.capture()
+    update_image()
 
-        self.x1 = tk.StringVar(self.root, '898')
-        self.x2 = tk.StringVar(self.root, '951')
-        self.y1 = tk.StringVar(self.root, '807')
-        self.y2 = tk.StringVar(self.root, '821')
 
-        self.x1_i = int(self.x1.get())
-        self.x2_i = int(self.x2.get())
-        self.y1_i = int(self.y1.get())
-        self.y2_i = int(self.y2.get())
+def update_bbox(*args):
+    # executed when entrybox value for coordinate is changed
+    update_bbox_ints()
+    main.bbox = [x1_i, y1_i, x2_i, y2_i]
+    print(state.get())
 
-        # 0 = off, 1 = on can buy, 0 = on cannot buy
-        self.state = tk.IntVar()
 
-        self.root.geometry("600x400")
-        self.root.title("Autofisher")
+def validate( text, *args):
+    if text.isdigit() and text != " ":
+        # print(y1.get())
 
-        # TITLE / SUBTITLE
+        return True
+    else:
+        return False
 
-        self.title = tk.Label(self.root, text="Autofisher", font=('Lato', 18))
-        self.title.pack(pady=10)
 
-        self.subtitle = tk.Label(self.root, text="Made by @cityofgod. on Discord!", font=('Lato', 12))
-        self.subtitle.pack()
+def update_image():
+    global vision_load, vision
+    vision_load = Image.open('testpoint.png')
+    vision_load = vision_load.resize((264, 64))
+    vision = ImageTk.PhotoImage(vision_load)
+    vision_label.config(image=vision)
 
-        # VISION WIDGET
 
-        self.vision_load = Image.open('testpoint.png')
-        self.vision_load = self.vision_load.resize((264, 64))
+def main_loop():
+    # any continuous code goes here
+    print(state, typeof())
+    root.after(1000, main_loop)
 
-        self.vision = ImageTk.PhotoImage(self.vision_load)
-        self.vision_label = tk.Label(self.root, image=self.vision)
-        self.vision_label.place(relx=0.98, rely=0.98, anchor=tk.SE)  # Place at the bottom right
 
-        self.vision_label_text = tk.Label(self.root, text="Vision", font=('Lato', 16))
-        self.vision_label_text.place(relx=0.8, rely=0.8, anchor=tk.SE)
+def update_bbox_ints():
+    global x1_i, y1_i, x2_i, y2_i
+    x1_i = int(x1.get())
+    x2_i = int(x2.get())
+    y1_i = int(y1.get())
+    y2_i = int(y2.get())
 
-        # RADIO BUTTONS
 
-        self.radio_off = tk.Radiobutton(self.root, text="Off", variable=self.state, value=0, command=self.handle_selection)
-        self.radio_on_can_buy = tk.Radiobutton(self.root, text="On (Can sell)", variable=self.state, value=1, command=self.handle_selection)
-        self.radio_on_cannot_buy = tk.Radiobutton(self.root, text="On (Cannot sell)", variable=self.state, value=2, command=self.handle_selection)
+# root.after(1, main.main())
 
-        self.radio_on_can_buy.pack(anchor='w', pady=20)
-        self.radio_on_cannot_buy.pack(anchor='w', pady=20)
-        self.radio_off.pack(anchor='w', pady=20)
+root.attributes('-topmost', True)
+root.resizable(False, False)
 
-        # BOUNDING BOX -> 898, 807, 951, 821
 
-        validation = self.root.register(self.validate)
+update_bbox_ints()
 
-        self.x1_entry_label = tk.Label(self.root, text="x1", font=("Lato", 10))
-        self.x1_entry_label.place(x=175, y=335)
-        self.x1_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=self.x1)
-        self.x1_entry.place(x=200, y=335)
-        self.x1.trace("w", self.update_bbox)
+# 0 = off, 1 = on can buy, 0 = on cannot buy
+state = tk.IntVar()
 
-        self.x2_entry_label = tk.Label(self.root, text="x2", font=("Lato", 10))
-        self.x2_entry_label.place(x=175, y=365)
-        self.x2_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=self.x2)
-        self.x2_entry.place(x=200, y=365)
-        self.x2.trace("w", self.update_bbox)
+root.geometry("600x400")
+root.title("Autofisher")
 
-        self.y1_entry_label = tk.Label(self.root, text="y1", font=("Lato", 10))
-        self.y1_entry_label.place(x=250, y=335)
-        self.y1_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=self.y1)
-        self.y1_entry.place(x=275, y=335)
-        self.y1.trace("w", self.update_bbox)
+# TITLE / SUBTITLE
 
-        self.y2_entry_label = tk.Label(self.root, text="y2", font=("Lato", 10))
-        self.y2_entry_label.place(x=250, y=365)
-        self.y2_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=self.y2)
-        self.y2_entry.place(x=275, y=365)
-        self.y2.trace("w", self.update_bbox)
+title = tk.Label(root, text="Autofisher", font=('Lato', 18))
+title.pack(pady=10)
 
-        # LOOP
+subtitle = tk.Label(root, text="Made by @cityofgod. on Discord!", font=('Lato', 12))
+subtitle.pack()
 
-        self.root.mainloop()
+# VISION WIDGET
 
-    def handle_selection(self):
-        main.capture()
-        self.update_image()
+vision_load = vision_load.resize((264, 64))
 
-    def update_bbox(self, *args):
-        print(f'({self.x1.get()}, {self.y1.get()}), ({self.x2.get()}, {self.y2.get()})')
-        print(self.x1_i)
+vision = ImageTk.PhotoImage(vision_load)
+vision_label = tk.Label(root, image=vision)
+vision_label.place(relx=0.98, rely=0.98, anchor=tk.SE)  # Place at the bottom right
 
-    def validate(self, text, *args):
-        if text.isdigit() and text != " ":
-            # print(self.y1.get())
+vision_label_text = tk.Label(root, text="Vision", font=('Lato', 16))
+vision_label_text.place(relx=0.8, rely=0.8, anchor=tk.SE)
 
-            return True
-        else:
-            return False
+# RADIO BUTTONS
 
-    def update_image(self):
-        self.vision_load = Image.open('testpoint.png')
-        self.vision_load = self.vision_load.resize((264, 64))
-        self.vision = ImageTk.PhotoImage(self.vision_load)
-        self.vision_label.config(image=self.vision)
+radio_off = tk.Radiobutton(root, text="Off", variable=state, value=0, command=handle_selection)
+radio_on_can_buy = tk.Radiobutton(root, text="On (Can sell)", variable=state, value=1, command=handle_selection)
+radio_on_cannot_buy = tk.Radiobutton(root, text="On (Cannot sell)", variable=state, value=2, command=handle_selection)
 
-    def main_loop(self):
-        # any continous code goes here
-        self.root.after(1000, main.main())
+radio_on_can_buy.pack(anchor='w', pady=20)
+radio_on_cannot_buy.pack(anchor='w', pady=20)
+radio_off.pack(anchor='w', pady=20)
+
+# BOUNDING BOX -> 898, 807, 951, 821
+
+validation = root.register(validate)
+
+x1_entry_label = tk.Label(root, text="x1", font=("Lato", 10))
+x1_entry_label.place(x=175, y=335)
+x1_entry = tk.Entry(root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=x1)
+x1_entry.place(x=200, y=335)
+x1.trace("w", update_bbox)
+
+x2_entry_label = tk.Label(root, text="x2", font=("Lato", 10))
+x2_entry_label.place(x=175, y=365)
+x2_entry = tk.Entry(root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=x2)
+x2_entry.place(x=200, y=365)
+x2.trace("w", update_bbox)
+
+y1_entry_label = tk.Label(root, text="y1", font=("Lato", 10))
+y1_entry_label.place(x=250, y=335)
+y1_entry = tk.Entry(root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=y1)
+y1_entry.place(x=275, y=335)
+y1.trace("w", update_bbox)
+
+y2_entry_label = tk.Label(root, text="y2", font=("Lato", 10))
+y2_entry_label.place(x=250, y=365)
+y2_entry = tk.Entry(root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=y2)
+y2_entry.place(x=275, y=365)
+y2.trace("w", update_bbox)
 
 
 if __name__ == '__main__':
+
+    # LOOP
+
+    root.after(1000, main_loop)
+    root.mainloop()
+
     main.timer()
-    gui = GUI()
+    # gui = GUI()

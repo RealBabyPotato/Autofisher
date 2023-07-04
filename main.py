@@ -5,6 +5,7 @@ import threading
 from playsound import playsound
 from pynput import keyboard
 from ahk import AHK
+import tkinter
 # import gui
 
 active_can_buy = False
