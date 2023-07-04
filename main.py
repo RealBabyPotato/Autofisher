@@ -5,6 +5,7 @@ import threading
 from playsound import playsound
 from pynput import keyboard
 from ahk import AHK
+import gui
 
 active_can_buy = False
 active_cannot_buy = False
@@ -138,30 +139,31 @@ def timer():
 # (1178, 421) --> 'Sell'
 # Note: press mouse button 1 after selling to confirm!
 
-listener = keyboard.Listener(on_press=on_press)
-listener.start()
+if __name__ == '__main__':
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start()
 
-last_recorded_mean = [None, None, None]
+    last_recorded_mean = [None, None, None]
 
-print("Press [f1] to toggle active (CAN buy/sell), [f2] to toggle active (CANNOT buy/sell), [f3] to set mouse casting position")
+    print("Press [f1] to toggle active (CAN buy/sell), [f2] to toggle active (CANNOT buy/sell), [f3] to set mouse casting position")
 
-timer()
+    timer()
 
-while True:
+    while True:
 
-    while active_can_buy and mouse_cast_position != (None, None):
-        colour_mean = ImageStat.Stat(capture()).mean
-        analyze(colour_mean)
+        while active_can_buy and mouse_cast_position != (None, None):
+            colour_mean = ImageStat.Stat(capture()).mean
+            analyze(colour_mean)
 
-        time.sleep(0.1)
+            time.sleep(0.1)
 
-    while active_cannot_buy and mouse_cast_position != (None, None):
-        colour_mean = ImageStat.Stat(capture()).mean
-        analyze(colour_mean)
+        while active_cannot_buy and mouse_cast_position != (None, None):
+            colour_mean = ImageStat.Stat(capture()).mean
+            analyze(colour_mean)
 
-        time.sleep(0.1)
+            time.sleep(0.1)
 
-    if mouse_cast_position == (None, None):
-        print("A mouse cast position has not been assigned. Press [f3] to assign one. ")
+        if mouse_cast_position == (None, None):
+            print("A mouse cast position has not been assigned. Press [f3] to assign one. ")
 
-    time.sleep(1)
+        time.sleep(1)
