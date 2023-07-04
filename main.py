@@ -11,6 +11,8 @@ active_can_buy = False
 active_cannot_buy = False
 mouse_cast_position = (None, None)
 
+# x1, y1, x2, y2
+bbox = [898, 807, 951, 821]
 
 mouse = Controller()
 kb = keyboard.Controller()
@@ -58,7 +60,7 @@ def capture():
     # OLD pos (898, 804, 951, 821)
     # NEW pos (898, 807, 951, 821)
 
-    img = ImageGrab.grab(bbox=(898, 807, 951, 821))
+    img = ImageGrab.grab(bbox=(bbox[0], bbox[1], bbox[2], bbox[3]))
     img.save(f'testpoint.png')
     return img
 
