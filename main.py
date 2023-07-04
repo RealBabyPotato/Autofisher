@@ -5,19 +5,25 @@ import threading
 from playsound import playsound
 from pynput import keyboard
 from ahk import AHK
+# import gui
 
 active_can_buy = False
 active_cannot_buy = False
 mouse_cast_position = (None, None)
 
+# x1, y1, x2, y2
+bbox = [898, 807, 951, 821]
+
 mouse = Controller()
 kb = keyboard.Controller()
 ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe")
 
+cast_time = 3.5 # float(input("type 'cast_time' number jaden says here: "))
+sell_time = 1200 # int(input("type 'sell_time' number jaden says here: "))
 
 def ding():
     try:
-        playsound(r'C:\Users\jlamb\PycharmProjects\Autofisher\ding.mp3')
+        playsound(r'ding.mp3')
     except:
         print("Failed to play sound (try pressing the toggle button slower!)")
 
@@ -54,7 +60,7 @@ def capture():
     # OLD pos (898, 804, 951, 821)
     # NEW pos (898, 807, 951, 821)
 
-    img = ImageGrab.grab(bbox=(898, 807, 951, 821))
+    img = ImageGrab.grab(bbox=(bbox[0], bbox[1], bbox[2], bbox[3]))
     img.save(f'testpoint.png')
     return img
 
@@ -116,7 +122,7 @@ def analyze(mean):
     else:
         print("Detected not fishing, casting")
         mouse.click(Button.left, 1)
-        time.sleep(3.5)
+        time.sleep(cast_time) # previous was 3.5
         mouse.click(Button.left, 1)
 
     return mean
@@ -124,31 +130,10 @@ def analyze(mean):
 
 def timer():
     print("Starting timer")
-    thread = threading.Timer(1200, sell)
+    thread = threading.Timer(sell_time, sell)
     thread.start()
 
-
-# (867, 818) --> test point
-# [92.43589743589743, 250.28205128205127, 92.43589743589743] -> slight white
-# [83.0, 250.0, 83.0] -> just green
-# [181.21153846153845, 252.87179487179486, 181.21153846153845] -> half white
-
-# (1371, 683) --> 'Sure' to Caster
-# (1268, 430) --> 'Sell Everything'
-# (1178, 421) --> 'Sell'
-# Note: press mouse button 1 after selling to confirm!
-
-listener = keyboard.Listener(on_press=on_press)
-listener.start()
-
-last_recorded_mean = [None, None, None]
-
-print("Press [f1] to toggle active (CAN buy/sell), [f2] to toggle active (CANNOT buy/sell), [f3] to set mouse casting position")
-
-timer()
-
-while True:
-
+def main():
     while active_can_buy and mouse_cast_position != (None, None):
         colour_mean = ImageStat.Stat(capture()).mean
         analyze(colour_mean)
@@ -164,4 +149,32 @@ while True:
     if mouse_cast_position == (None, None):
         print("A mouse cast position has not been assigned. Press [f3] to assign one. ")
 
-    time.sleep(1)
+# (867, 818) --> test point
+# [92.43589743589743, 250.28205128205127, 92.43589743589743] -> slight white
+# [83.0, 250.0, 83.0] -> just green
+# [181.21153846153845, 252.87179487179486, 181.21153846153845] -> half white
+
+# (1371, 683) --> 'Sure' to Caster
+# (1268, 430) --> 'Sell Everything'
+# (1178, 421) --> 'Sell'
+# Note: press mouse button 1 after selling to confirm!
+
+
+if __name__ == '__main__':
+
+
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start()
+
+    last_recorded_mean = [None, None, None]
+
+    print("Press [f1] to toggle active (CAN buy/sell), [f2] to toggle active (CANNOT buy/sell), [f3] to set mouse casting position")
+
+    timer()
+
+    while True:
+
+
+        main()
+
+        time.sleep(1)
