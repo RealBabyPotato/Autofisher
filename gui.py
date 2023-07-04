@@ -13,6 +13,7 @@ If detected 3 fishing in a row, deactivate fishing
 
 '''
 
+
 class GUI:
 
     def __init__(self):
@@ -22,6 +23,16 @@ class GUI:
 
         self.root.attributes('-topmost', True)
         self.root.resizable(False, False)
+
+        self.x1 = tk.StringVar(self.root, '898')
+        self.x2 = tk.StringVar(self.root, '951')
+        self.y1 = tk.StringVar(self.root, '807')
+        self.y2 = tk.StringVar(self.root, '821')
+
+        self.x1_i = int(self.x1.get())
+        self.x2_i = int(self.x2.get())
+        self.y1_i = int(self.y1.get())
+        self.y2_i = int(self.y2.get())
 
         # 0 = off, 1 = on can buy, 0 = on cannot buy
         self.state = tk.IntVar()
@@ -65,27 +76,27 @@ class GUI:
 
         self.x1_entry_label = tk.Label(self.root, text="x1", font=("Lato", 10))
         self.x1_entry_label.place(x=175, y=335)
-        self.x1_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5)
+        self.x1_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=self.x1)
         self.x1_entry.place(x=200, y=335)
-        self.x1_entry.insert(tk.END, 898)
+        self.x1.trace("w", self.printinput)
 
         self.x2_entry_label = tk.Label(self.root, text="x2", font=("Lato", 10))
         self.x2_entry_label.place(x=175, y=365)
-        self.x2_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5)
+        self.x2_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=self.x2)
         self.x2_entry.place(x=200, y=365)
-        self.x2_entry.insert(tk.END, 951)
+        self.x2.trace("w", self.printinput)
 
         self.y1_entry_label = tk.Label(self.root, text="y1", font=("Lato", 10))
         self.y1_entry_label.place(x=250, y=335)
-        self.y1_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5)
+        self.y1_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=self.y1)
         self.y1_entry.place(x=275, y=335)
-        self.y1_entry.insert(tk.END, 807)
+        self.y1.trace("w", self.printinput)
 
         self.y2_entry_label = tk.Label(self.root, text="y2", font=("Lato", 10))
         self.y2_entry_label.place(x=250, y=365)
-        self.y2_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5)
+        self.y2_entry = tk.Entry(self.root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=self.y2)
         self.y2_entry.place(x=275, y=365)
-        self.y2_entry.insert(tk.END, 821)
+        self.y2.trace("w", self.printinput)
 
         # LOOP
 
@@ -95,12 +106,13 @@ class GUI:
         main.capture()
         self.update_image()
 
-    def validate_and_update(self, text):
+    def printinput(self, *args):
+        print(f'({self.x1.get()}, {self.y1.get()}), ({self.x2.get()}, {self.y2.get()})')
+
+    def validate_and_update(self, text, *args):
         if text.isdigit() and text != " ":
-            '''self.x1 = self.x1_entry.get()
-            self.x2 = self.x2_entry.get()
-            self.y1 = self.y1_entry.get()
-            self.y2 = self.y2_entry.get()'''
+            # print(self.y1.get())
+
             return True
         else:
             return False

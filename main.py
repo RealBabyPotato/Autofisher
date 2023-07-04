@@ -5,20 +5,23 @@ import threading
 from playsound import playsound
 from pynput import keyboard
 from ahk import AHK
-import gui
+# import gui
 
 active_can_buy = False
 active_cannot_buy = False
 mouse_cast_position = (None, None)
 
+
 mouse = Controller()
 kb = keyboard.Controller()
 ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe")
 
+cast_time = 3.5 # float(input("type 'cast_time' number jaden says here: "))
+sell_time = 1200 # int(input("type 'sell_time' number jaden says here: "))
 
 def ding():
     try:
-        playsound(r'C:\Users\jlamb\PycharmProjects\Autofisher\ding.mp3')
+        playsound(r'ding.mp3')
     except:
         print("Failed to play sound (try pressing the toggle button slower!)")
 
@@ -117,7 +120,7 @@ def analyze(mean):
     else:
         print("Detected not fishing, casting")
         mouse.click(Button.left, 1)
-        time.sleep(3.5)
+        time.sleep(cast_time) # previous was 3.5
         mouse.click(Button.left, 1)
 
     return mean
@@ -125,7 +128,7 @@ def analyze(mean):
 
 def timer():
     print("Starting timer")
-    thread = threading.Timer(1200, sell)
+    thread = threading.Timer(sell_time, sell)
     thread.start()
 
 def main():
@@ -154,7 +157,10 @@ def main():
 # (1178, 421) --> 'Sell'
 # Note: press mouse button 1 after selling to confirm!
 
+
 if __name__ == '__main__':
+
+
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
 
@@ -165,6 +171,7 @@ if __name__ == '__main__':
     timer()
 
     while True:
+
 
         main()
 
