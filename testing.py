@@ -1,10 +1,4 @@
-import pyautogui
-from pynput.mouse import Controller
+from PIL import Image
 
-ms = Controller()
-
-print(pyautogui.size())
-
-
-while True:
-    print(ms.position)
+img = Image.open('testpoint.png')
+img.show()

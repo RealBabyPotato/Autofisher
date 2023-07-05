@@ -5,6 +5,7 @@ import threading
 from playsound import playsound
 from pynput import keyboard
 from ahk import AHK
+import tkinter as tk
 
 active_can_buy = False
 active_cannot_buy = False
@@ -14,6 +15,8 @@ mouse = Controller()
 kb = keyboard.Controller()
 ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe")
 
+cast_time = 3.5 # float(input("type 'cast_time' number jaden says here: "))
+sell_time = 30 #1200 # int(input("type 'sell_time' number jaden says here: "))
 
 def ding():
     try:
@@ -100,7 +103,48 @@ def sell():
     timer()
 
 
-def analyze(mean):
+def tk_sell(root: tk.Tk = None):
+    global mouse_cast_position, active_can_buy, active_cannot_buy
+
+    if active_can_buy:
+        frozen_state_can_buy = active_can_buy
+        frozen_state_cannot_buy = active_cannot_buy
+
+        active_can_buy = False
+        active_cannot_buy = False
+
+        kb.press('e')
+        kb.release('e')
+
+        root.after(2000)
+        ahk.mouse_move(1377, 582)
+
+        root.after(2000)
+        mouse.click(Button.left, 1)
+
+        root.after(1000)
+        ahk.mouse_move(1268, 430)
+        mouse.click(Button.left, 1)
+
+        root.after(1000)
+        ahk.mouse_move(1178, 421)
+        mouse.click(Button.left, 1)
+
+        root.after(1000)
+        mouse.click(Button.left, 1)
+
+        root.after(250)
+        ahk.mouse_move(mouse_cast_position[0], mouse_cast_position[1])
+
+        root.after(250)
+
+        active_can_buy = frozen_state_can_buy
+        active_cannot_buy = frozen_state_cannot_buy
+
+    timer()
+
+
+def analyze(mean, root: tk.Tk = None):
 
     if [round(x) for x in mean] == [83.0, 250.0, 83.0]:
         print("Detected fish on, waiting")
@@ -116,13 +160,16 @@ def analyze(mean):
     else:
         print("Detected not fishing, casting")
         mouse.click(Button.left, 1)
-        time.sleep(3.5)
+        if root:
+            root.after(cast_time * 1000 )# time.sleep(cast_time) # previous was 3.5
+        else:
+            time.sleep(3.5)
         mouse.click(Button.left, 1)
 
     return mean
 
 
-def timer():
+def timer(root: tk.Tk = None):
     print("Starting timer")
     thread = threading.Timer(1200, sell)
     thread.start()
@@ -138,30 +185,46 @@ def timer():
 # (1178, 421) --> 'Sell'
 # Note: press mouse button 1 after selling to confirm!
 
-listener = keyboard.Listener(on_press=on_press)
-listener.start()
+# timer()
 
-last_recorded_mean = [None, None, None]
+def main(root: tk.Tk = None):
+    while True:
+        while active_can_buy or active_cannot_buy: #and mouse_cast_position != (None, None):
+            colour_mean = ImageStat.Stat(capture()).mean
 
-print("Press [f1] to toggle active (CAN buy/sell), [f2] to toggle active (CANNOT buy/sell), [f3] to set mouse casting position")
+            if root:
+                analyze(colour_mean, root)
+            else:
+                analyze(colour_mean)
 
-timer()
+            time.sleep(0.1)
 
-while True:
+        time.sleep(1)
 
-    while active_can_buy and mouse_cast_position != (None, None):
-        colour_mean = ImageStat.Stat(capture()).mean
-        analyze(colour_mean)
+# (867, 818) --> test point
+# [92.43589743589743, 250.28205128205127, 92.43589743589743] -> slight white
+# [83.0, 250.0, 83.0] -> just green
+# [181.21153846153845, 252.87179487179486, 181.21153846153845] -> half white
 
-        time.sleep(0.1)
+# (1371, 683) --> 'Sure' to Caster
+# (1268, 430) --> 'Sell Everything'
+# (1178, 421) --> 'Sell'
+# Note: press mouse button 1 after selling to confirm!
 
-    while active_cannot_buy and mouse_cast_position != (None, None):
-        colour_mean = ImageStat.Stat(capture()).mean
-        analyze(colour_mean)
 
-        time.sleep(0.1)
+if __name__ == '__main__':
 
-    if mouse_cast_position == (None, None):
-        print("A mouse cast position has not been assigned. Press [f3] to assign one. ")
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start()
 
-    time.sleep(1)
+    last_recorded_mean = [None, None, None]
+
+    print("Press [f1] to toggle active (CAN buy/sell), [f2] to toggle active (CANNOT buy/sell), [f3] to set mouse casting position")
+
+    timer()
+
+    while True:
+
+        main()
+
+        time.sleep(1)
