@@ -2,7 +2,6 @@ from pynput.mouse import Button, Controller
 from PIL import ImageGrab, ImageStat, Image
 import time
 import threading
-from playsound import playsound
 from pynput import keyboard
 from ahk import AHK
 import tkinter as tk
@@ -16,16 +15,10 @@ bbox = [898, 807, 951, 821]
 
 mouse = Controller()
 kb = keyboard.Controller()
-ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe")
+ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe") # THIS NEEDS CHANGING!
 
-cast_time = 3.5 # float(input("type 'cast_time' number jaden says here: "))
-sell_time = 1200 # int(input("type 'sell_time' number jaden says here: "))
-
-def ding():
-    try:
-        playsound(r'ding.mp3')
-    except:
-        print("Failed to play sound (try pressing the toggle button slower!)")
+cast_time = 3.5
+sell_time = 1200
 
 
 def on_press(key):
@@ -38,14 +31,10 @@ def on_press(key):
 
     except AttributeError:
         if key == keyboard.Key.f1:
-            thread = threading.Thread(target=ding)
-            thread.start()
             print("Toggling active (CAN buy)")
             active_can_buy = not active_can_buy if active_cannot_buy is False else False
 
         if key == keyboard.Key.f2:
-            thread = threading.Thread(target=ding)
-            thread.start()
             print("Toggling active (CANNOT buy)")
             active_cannot_buy = not active_cannot_buy if active_can_buy is False else False
 
@@ -57,7 +46,6 @@ def on_press(key):
 
 
 def capture() -> Image:
-    # OLD pos (898, 804, 951, 821)
     # NEW pos (898, 807, 951, 821)
 
     img = ImageGrab.grab(bbox=(bbox[0], bbox[1], bbox[2], bbox[3]))
@@ -106,7 +94,7 @@ def sell():
     timer()
 
 
-def tk_sell(root: tk.Tk = None):
+def tk_sell(root: tk.Tk):
     global mouse_cast_position, active_can_buy, active_cannot_buy
 
     if active_can_buy:
@@ -168,6 +156,7 @@ def analyze(mean, root: tk.Tk = None):
             time.sleep(0.2)
 
         mouse.click(Button.left, 1)
+
         if root:
             root.after(cast_time * 1000)
         else:
@@ -196,7 +185,7 @@ def timer(root: tk.Tk = None):
 
 def main(root: tk.Tk = None):
     while True:
-        while active_can_buy or active_cannot_buy: #and mouse_cast_position != (None, None):
+        while active_can_buy or active_cannot_buy:
             colour_mean = ImageStat.Stat(capture()).mean
 
             if root:
@@ -208,23 +197,11 @@ def main(root: tk.Tk = None):
 
         time.sleep(1)
 
-# (867, 818) --> test point
-# [92.43589743589743, 250.28205128205127, 92.43589743589743] -> slight white
-# [83.0, 250.0, 83.0] -> just green
-# [181.21153846153845, 252.87179487179486, 181.21153846153845] -> half white
-
-# (1371, 683) --> 'Sure' to Caster
-# (1268, 430) --> 'Sell Everything'
-# (1178, 421) --> 'Sell'
-# Note: press mouse button 1 after selling to confirm!
-
 
 if __name__ == '__main__':
 
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
-
-    print("Press [f1] to toggle active (CAN buy/sell), [f2] to toggle active (CANNOT buy/sell), [f3] to set mouse casting position")
 
     timer()
 

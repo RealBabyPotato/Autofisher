@@ -6,11 +6,12 @@ from PIL import Image, ImageTk
 '''
 
 TODO:
+<<<<<<< HEAD
 (O) Basic GUI
 (O) Display vision bbox area, allow adjusting 
 - Console w/ status updates (detected fishing, detected ...)
 - If detected 3 fishing in a row, deactivate fishing
--Show time until next sell
+- Show time until next sell
 - Keep a profile of preferred settings
 - If previous state was detected fish on and current state is detected not fishing then
 immediately click to speed up fishing process
