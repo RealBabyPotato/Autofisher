@@ -5,6 +5,7 @@ import threading
 from pynput import keyboard
 from ahk import AHK
 import tkinter as tk
+import gui
 
 active_can_buy = False
 active_cannot_buy = False
@@ -50,6 +51,7 @@ def capture() -> Image:
 
     img = ImageGrab.grab(bbox=(bbox[0], bbox[1], bbox[2], bbox[3]))
     img.save(f'testpoint.png')
+
     return img
 
 
@@ -96,6 +98,7 @@ def sell():
 
 def tk_sell(root: tk.Tk):
     global mouse_cast_position, active_can_buy, active_cannot_buy
+    gui.insert_console_text("Selling fish")
 
     if active_can_buy:
         frozen_state_can_buy = active_can_buy
@@ -133,6 +136,7 @@ def tk_sell(root: tk.Tk):
         active_cannot_buy = frozen_state_cannot_buy
 
     timer()
+    gui.insert_console_text(f"Restarting timer; selling again in {sell_time}s")
 
 
 def analyze(mean, root: tk.Tk = None):
@@ -169,6 +173,12 @@ def analyze(mean, root: tk.Tk = None):
 
 def timer(root: tk.Tk = None):
     print("Starting timer")
+
+    try:
+        gui.insert_console_text("Starting/resetting timer")
+    except NameError:
+        pass
+
     thread = threading.Timer(sell_time, sell)
     thread.start()
 
