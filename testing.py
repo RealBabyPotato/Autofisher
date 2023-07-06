@@ -1,4 +1,4 @@
-from PIL import Image
+import main
 
-img = Image.open('testpoint.png')
-img.show()
+main.capture()
+

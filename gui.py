@@ -1,7 +1,7 @@
+import threading
 import tkinter as tk
 import main
 from PIL import Image, ImageTk
-import threading
 
 '''
 
@@ -22,7 +22,6 @@ immediately click to speed up fishing process
 # INIT
 
 root = tk.Tk()
-# vision_load = Image.open('testpoint.png')
 
 x1 = tk.StringVar(root, '898')
 x2 = tk.StringVar(root, '951')
@@ -33,7 +32,6 @@ x1_i, y1_i, x2_i, y2_i = None, None, None, None
 
 
 def handle_selection():
-    main.capture()
     update_image()
 
     if state.get() == 0:
@@ -53,11 +51,10 @@ def update_bbox(*args):
     # executed when entrybox value for coordinate is changed
     update_bbox_ints()
     main.bbox = [x1_i, y1_i, x2_i, y2_i]
-    print(state.get())
 
 
 def validate( text, *args):
-    if text.isdigit() and text != " ":
+    if text.isdigit() or text == "":
         return True
     else:
         return False
@@ -65,6 +62,7 @@ def validate( text, *args):
 
 def update_image():
     global vision_load, vision
+    main.capture()
     vision_load = Image.open('testpoint.png')
     vision_load = vision_load.resize((264, 64))
     vision = ImageTk.PhotoImage(vision_load)
@@ -73,16 +71,22 @@ def update_image():
 
 def main_loop():
     # any continuous code goes here
-    # print(main.active_cannot_buy, main.active_can_buy)
-    root.after(1000, main_loop)
+    if state.get() == 1 or state.get() == 2:
+        update_image()
+
+    root.after(200, main_loop)
 
 
 def update_bbox_ints():
-    global x1_i, y1_i, x2_i, y2_i
-    x1_i = int(x1.get())
-    x2_i = int(x2.get())
-    y1_i = int(y1.get())
-    y2_i = int(y2.get())
+    global x1_i, y1_i, x2_i, y2_i, state
+    try:
+        x1_i = int(x1.get())
+        x2_i = int(x2.get())
+        y1_i = int(y1.get())
+        y2_i = int(y2.get())
+    except ValueError:
+        x1_i, x2_i, y1_i, y2_i = 0, 1, 0, 1
+        state.set(0)
 
 
 root.attributes('-topmost', True)
@@ -154,7 +158,6 @@ y2_entry_label.place(x=250, y=365)
 y2_entry = tk.Entry(root, validatecommand=(validation, "%P"), validate="key", width=5, textvariable=y2)
 y2_entry.place(x=275, y=365)
 y2.trace("w", update_bbox)
-
 
 if __name__ == '__main__':
 
