@@ -1,5 +1,8 @@
 import threading
 import tkinter as tk
+
+import PIL
+
 import main
 from PIL import Image, ImageTk
 import customtkinter as ctk
@@ -23,6 +26,8 @@ immediately click to speed up fishing process
 ? Allow bbox adjusting by clicking somewhere on the screen & registering coords from there
 - Kill thread after gui closes
 - Prevent user from putting in invalid coords
+- Say "try moving your camera to a darker spot (make sure vision is not displaying white)" if detected fish at threshold multiple times in a row &
+stop clicking mouse
 
 '''
 
@@ -66,10 +71,13 @@ def level_validate(inp, *args):
 def update_image():
     global vision_load, vision
     main.capture()
-    vision_load = Image.open('testpoint.png')
-    vision_load = vision_load.resize((264, 64))
-    vision = ImageTk.PhotoImage(vision_load)
-    vision_label.config(image=vision)
+    try:
+        vision_load = Image.open('testpoint.png')
+        vision_load = vision_load.resize((264, 64))
+        vision = ImageTk.PhotoImage(vision_load)
+        vision_label.config(image=vision)
+    except PIL.UnidentifiedImageError:
+        insert_console_text("Something went wrong displaying 'Vision'. The program should still be working normally.")
 
 
 def main_loop():
@@ -152,8 +160,8 @@ if __name__ == "__main__":
     vision_load = vision_load.resize((316, 86))
 
     vision = ImageTk.PhotoImage(vision_load)
-    vision_label = tk.Label(root, image=vision)
-    vision_label.place(relx=0.98, rely=0.98, anchor=tk.SE)  # Place at the bottom right
+    vision_label = tk.Label(root, image=vision, width=220, height=55)
+    vision_label.place(relx=1, rely=0.98, anchor=tk.SE)  # Place at the bottom right
 
     vision_label_text = ctk.CTkLabel(root, text="Vision", font=('Corbel light', 20))
     vision_label_text.place(relx=0.8, rely=0.775, anchor=tk.SE)
@@ -220,3 +228,4 @@ if __name__ == "__main__":
 
     root.after(1000, main_loop)
     root.mainloop()
+    state = 0

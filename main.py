@@ -20,7 +20,7 @@ ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe") # THIS 
 
 # cast_time = 4.5 - (gui.hook_speed_level * 0.02)
 cast_time = 3.5
-sell_time = 10
+sell_time = 1200
 
 
 def on_press(key):
@@ -159,13 +159,14 @@ def analyze(mean, root: tk.Tk = None):
         print("Detected not fishing, casting")
         if root:
             root.after(200)
+            print("This should be getting run.")
         else:
             time.sleep(0.2)
 
         mouse.click(Button.left, 1)
 
         if root:
-            root.after(cast_time * 1000)
+            root.after(cast_time)
         else:
             time.sleep(cast_time) # default 3.5
 
@@ -205,10 +206,15 @@ def main(root: tk.Tk = None):
         while active_can_buy or active_cannot_buy:
             colour_mean = ImageStat.Stat(capture()).mean
 
-            if root:
+            if root is not None:
+                print("we have root")
+                gui.update_image()
                 analyze(colour_mean, root)
             else:
+                print("we do not have root")
                 analyze(colour_mean)
+
+            print(active_can_buy, active_cannot_buy)
 
             time.sleep(0.1)
 
