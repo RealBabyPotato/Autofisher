@@ -18,8 +18,9 @@ mouse = Controller()
 kb = keyboard.Controller()
 ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe") # THIS NEEDS CHANGING!
 
+# cast_time = 4.5 - (gui.hook_speed_level * 0.02)
 cast_time = 3.5
-sell_time = 1200
+sell_time = 10
 
 
 def on_press(key):
@@ -56,6 +57,7 @@ def capture() -> Image:
 
 
 def sell():
+    print("THIS IS NOT TK_SELL()!")
     global mouse_cast_position, active_can_buy, active_cannot_buy
 
     if active_can_buy:
@@ -98,6 +100,7 @@ def sell():
 
 def tk_sell(root: tk.Tk):
     global mouse_cast_position, active_can_buy, active_cannot_buy
+    print("should be here!")
     gui.insert_console_text("Selling fish")
 
     if active_can_buy:
@@ -181,6 +184,10 @@ def timer(root: tk.Tk = None):
 
     thread = threading.Timer(sell_time, sell)
     thread.start()
+    #if root:
+    #    thread = threading.Timer(sell_time, tk_sell, args=root)
+    #    thread.start()
+    #else:
 
 # (867, 818) --> test point
 # [92.43589743589743, 250.28205128205127, 92.43589743589743] -> slight white
