@@ -1,8 +1,6 @@
 import threading
 import tkinter as tk
-
 import PIL
-
 import main
 from PIL import Image, ImageTk
 import customtkinter as ctk
@@ -16,20 +14,26 @@ TODO:
 (O) Display vision bbox area, allow adjusting 
 (O) Console w/ status updates (detected fishing, detected ...)
 (O) If previous state was detected fish on and current state is detected not fishing then
-(O) - Adjust cast time based off of hook speed level
+(O) Adjust cast time based off of hook speed level
+(O) immediately click to speed up fishing process
+- Add logging
 - Adjust sell time based off of bag size
-immediately click to speed up fishing process
 - Set cast position timer; click button -> button changes colour -> click anywhere on screen & register mouse pos
 - If detected 3 fishing in a row, deactivate fishing
-? Show time until next sell
 - Keep a profile of preferred settings
-? Allow bbox adjusting by clicking somewhere on the screen & registering coords from there
 - Kill thread after gui closes
 - Prevent user from putting in invalid coords
 - Say "try moving your camera to a darker spot (make sure vision is not displaying white)" if detected fish at threshold multiple times in a row &
 stop clicking mouse
+? Allow bbox adjusting by clicking somewhere on the screen & registering coords from there
+? Show time until next sell
+
+34 fish in 4m 11s for hook speed = 50 & reel speed = 50
 
 '''
+
+x1_i, y1_i, x2_i, y2_i, hook_speed_level_i = None, None, None, None, 50
+pil_image_error_thrown = False
 
 
 def handle_selection():
@@ -68,22 +72,35 @@ def level_validate(inp, *args):
         return False
 
 
+def backpack_validate(inp, *args):
+    if inp.isdigit() and 0 < int(inp) <= 10000:
+        return True
+    else:
+        return False
+
+
 def update_image():
-    global vision_load, vision
+    global vision_load, vision, vision_label, pil_image_error_thrown
     main.capture()
     try:
         vision_load = Image.open('testpoint.png')
-        vision_load = vision_load.resize((264, 64))
+        vision_load = vision_load.resize((316, 86))
         vision = ImageTk.PhotoImage(vision_load)
         vision_label.config(image=vision)
     except PIL.UnidentifiedImageError:
-        insert_console_text("Something went wrong displaying 'Vision'. The program should still be working normally.")
+        if not pil_image_error_thrown:
+            insert_console_text("Something went wrong displaying 'Vision'. The program should still be working normally.")
+            pil_image_error_thrown = True
+    except NameError:
+        pass
 
 
 def main_loop():
     # any continuous code goes here
     if state.get() == 1 or state.get() == 2:
         update_image()
+
+    #print(main.sell_time)
 
     root.after(200, main_loop)
 
@@ -102,20 +119,40 @@ def update_bbox_ints():
 
 
 def update_setting_ints(*args):
-    global hook_speed_level_i
+    global hook_speed_level_i, backpack_size_level
 
     try:
         hook_speed_level_i = int(hook_speed_level.get())
         main.cast_time = 4.5 - (hook_speed_level_i * 0.02)
+
+        # CHANGE THIS!
+        main.sell_time = int(backpack_size_level.get())
+
+        insert_console_text(f"Setting a new sell time of {main.sell_time}s. Please wait for the current sell time to reset.")
+
     except ValueError:
+        insert_console_text("Something went wrong with your hook speed level or backpack size. Please try again.")
         hook_speed_level_i = 50
         main.cast_time = 3.5
 
 
-def insert_console_text(text):
-    console.configure(state=tk.NORMAL)
-    console.insert(tk.END, f"[{time.strftime('%H:%M')}]: {text}\n")
-    console.configure(state=tk.DISABLED)
+def insert_console_text(text, cons: ctk.CTkTextbox = None):
+    if not cons:
+        global console
+
+        try:
+            console.configure(state=tk.NORMAL)
+            console.insert(tk.END, f"[{time.strftime('%H:%M')}]: {text}\n")
+            console.configure(state=tk.DISABLED)
+            console.see("end")
+        except NameError:
+            pass
+
+    else:
+        cons.configure(state=tk.NORMAL)
+        cons.insert(tk.END, f"[{time.strftime('%H:%M')}]: {text}\n")
+        cons.configure(state=tk.DISABLED)
+        cons.see("end")
 
 
 if __name__ == "__main__":
@@ -132,8 +169,7 @@ if __name__ == "__main__":
     y2 = tk.StringVar(root, '821')
 
     hook_speed_level = tk.IntVar(root, 50)
-
-    x1_i, y1_i, x2_i, y2_i, hook_speed_level_i = None, None, None, None, 50
+    backpack_size_level = tk.IntVar(root, 10)
 
     root.attributes('-topmost', True)
     root.resizable(False, False)
@@ -180,6 +216,7 @@ if __name__ == "__main__":
 
     validation = root.register(validate)
     level_validation = root.register(level_validate)
+    backpack_validation = root.register(backpack_validate)
 
     x1_entry_label = ctk.CTkLabel(root, text="x1:", font=("Corbel light", 14))
     x1_entry_label.place(relx=0.3375, rely=0.885, anchor=tk.SE)
@@ -213,18 +250,25 @@ if __name__ == "__main__":
     hook_speed_entry.place(x=110, y=269)
     hook_speed_level.trace("w", update_setting_ints)
 
+    backpack_size_label = ctk.CTkLabel(root, text="Backpack Size: ", font=("Corbel light", 14))
+    backpack_size_label.place(x=5, y=240)
+    backpack_size_entry = ctk.CTkEntry(root, validatecommand=(backpack_validation, "%P"), validate="key", width=50, border_width=0, textvariable=backpack_size_level, font=("Corbel light", 16))
+    backpack_size_entry.place(x=90, y=239)
+    backpack_size_level.trace("w", update_setting_ints)
+
     # CONSOLE
 
     console = ctk.CTkTextbox(root, font=('Courier new', 11), width=225, height=125, corner_radius=5, state=tk.DISABLED)
     console.place(x=275, y=80)
+    insert_console_text(f"This is the console.")
 
     # LOOP
-    main.timer(root)
+    main.timer(root, console)
 
+    # add args=root?
     logic_thread = threading.Thread(target=main.main)
     logic_thread.start()
 
-    insert_console_text(f"This is the console.")
 
     root.after(1000, main_loop)
     root.mainloop()

@@ -5,6 +5,7 @@ import threading
 from pynput import keyboard
 from ahk import AHK
 import tkinter as tk
+import customtkinter as ctk
 import gui
 
 active_can_buy = False
@@ -20,7 +21,7 @@ ahk = AHK(executable_path=r"C:\Program Files\AutoHotkey\AutoHotkey.exe") # THIS 
 
 # cast_time = 4.5 - (gui.hook_speed_level * 0.02)
 cast_time = 3.5
-sell_time = 1200
+sell_time = 10
 
 
 def on_press(key):
@@ -98,9 +99,8 @@ def sell():
     timer()
 
 
-def tk_sell(root: tk.Tk):
+def tk_sell(root: ctk.CTk, cons: ctk.CTkTextbox = None):
     global mouse_cast_position, active_can_buy, active_cannot_buy
-    print("should be here!")
     gui.insert_console_text("Selling fish")
 
     if active_can_buy:
@@ -138,28 +138,29 @@ def tk_sell(root: tk.Tk):
         active_can_buy = frozen_state_can_buy
         active_cannot_buy = frozen_state_cannot_buy
 
-    timer()
+    timer(root, cons)
     gui.insert_console_text(f"Restarting timer; selling again in {sell_time}s")
 
 
-def analyze(mean, root: tk.Tk = None):
+def analyze(mean, root: ctk.CTk = None):
 
     if [round(x) for x in mean] == [83.0, 250.0, 83.0]:
-        print("Detected fish on, waiting")
+        # print("Detected fish on, waiting")
+        pass
 
     elif mean[0] > 80 and mean[1] > 240 and mean[2] > 80:
-        print("Detected fish at threshold, clicking")
+        # print("Detected fish at threshold, clicking")
         mouse.click(Button.left, 1)
 
     elif [round(x) for x in mean] == [43, 43, 43]:
-        print("Detected in IDE, passing")
+        # print("Detected in IDE, passing")
         pass
 
     else:
-        print("Detected not fishing, casting")
+        # print("Detected not fishing, casting")
         if root:
             root.after(200)
-            print("This should be getting run.")
+            # print("This should be getting run.")
         else:
             time.sleep(0.2)
 
@@ -175,20 +176,16 @@ def analyze(mean, root: tk.Tk = None):
     return mean
 
 
-def timer(root: tk.Tk = None):
-    print("Starting timer")
+def timer(root: ctk.CTk = None, cons: ctk.CTkTextbox = None):
+    print(f"Starting timer ({sell_time})s")
 
     try:
-        gui.insert_console_text("Starting/resetting timer")
-    except NameError:
+        gui.insert_console_text(f"New sell timer: {sell_time}s", cons)
+    except AttributeError:
         pass
 
-    thread = threading.Timer(sell_time, sell)
+    thread = threading.Timer(sell_time, tk_sell, args=(root, cons))
     thread.start()
-    #if root:
-    #    thread = threading.Timer(sell_time, tk_sell, args=root)
-    #    thread.start()
-    #else:
 
 # (867, 818) --> test point
 # [92.43589743589743, 250.28205128205127, 92.43589743589743] -> slight white
@@ -201,18 +198,13 @@ def timer(root: tk.Tk = None):
 # Note: press mouse button 1 after selling to confirm!
 
 
-def main(root: tk.Tk = None):
+def main(root: ctk.CTk = None):
     while True:
         while active_can_buy or active_cannot_buy:
             colour_mean = ImageStat.Stat(capture()).mean
+            analyze(colour_mean, root)
 
-            if root is not None:
-                print("we have root")
-                gui.update_image()
-                analyze(colour_mean, root)
-            else:
-                print("we do not have root")
-                analyze(colour_mean)
+            gui.update_image()
 
             print(active_can_buy, active_cannot_buy)
 
